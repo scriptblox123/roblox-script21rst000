@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Roblox Scripts | Разработка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at 20% 30%, #0a0a0a, #000000);
+            color: #f0f0f0;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            position: relative;
+            cursor: default;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 15% 30%, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 72% 18%, #ccc, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 45% 85%, #e0e0e0, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 88% 42%, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 5% 60%, #aaa, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 93% 77%, #f5f5f5, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 33% 12%, #ddd, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 67% 91%, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 49% 49%, #bbb, rgba(0,0,0,0)),
+                radial-gradient(circle at 10% 70%, rgba(80,80,80,0.2) 0%, rgba(0,0,0,0) 25%),
+                radial-gradient(circle at 90% 20%, rgba(150,150,150,0.15) 0%, rgba(0,0,0,0) 30%),
+                radial-gradient(circle at 40% 85%, rgba(60,60,60,0.2) 0%, rgba(0,0,0,0) 20%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px);
+            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, repeat, repeat;
+            background-size: 200px 200px, 150px 150px, 100px 100px, 80px 80px, 120px 120px, 90px 90px, 180px 180px, 60px 60px, 130px 130px, 300px 300px, 400px 400px, 350px 350px, auto;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .trail-particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(200,200,200,0.9) 0%, rgba(120,120,120,0.6) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 4px rgba(150,150,150,0.6);
+            will-change: transform, opacity;
+        }
+
+        @keyframes particleSmooth {
+            0% { opacity: 0.7; transform: scale(0.6); }
+            20% { opacity: 0.9; transform: scale(1); }
+            80% { opacity: 0.4; transform: scale(0.7); }
+            100% { opacity: 0; transform: scale(0.2); }
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .top-nav {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2.5rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #f0f0f0;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 0.5rem 1.5rem;
+            border-radius: 3rem;
+            transition: all 0.25s ease;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.15);
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-color: rgba(255,255,255,0.6);
+            transform: scale(1.02);
+        }
+
+        .hero {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 3rem 2rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.25);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            margin-bottom: 1rem;
+        }
+
+        .discord-highlight {
+            background: rgba(88, 101, 242, 0.2);
+            border: 1px solid rgba(88, 101, 242, 0.6);
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .discord-highlight span {
+            color: #a0a0ff;
+        }
+
+        .discord-highlight-beta {
+            background: rgba(0, 255, 255, 0.15);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .discord-highlight-beta span {
+            color: #88ffff;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px 2px 5px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-size: 0.7rem;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+
+        .verified-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            font-size: 9px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .verified-text {
+            color: #a0a0ff;
+            font-size: 0.65rem;
+            letter-spacing: normal;
+        }
+
+        /* Стили для счётчика копирований */
+        .counter-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .counter-box {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .counter-label {
+            font-size: 0.85rem;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .counter-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .counter-unit {
+            font-size: 0.9rem;
+            color: #888;
+            margin-left: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: black;
+            padding: 0.75rem 2rem;
+            border-radius: 3rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: black;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+
+        .search-container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #444;
+            border-radius: 3rem;
+            padding: 0.3rem 0.3rem 0.3rem 1rem;
+            transition: 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: white;
+            background: #111;
+        }
+
+        .search-icon {
+            font-size: 1.3rem;
+            color: #aaa;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            padding: 0.8rem 0;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #666;
+        }
+
+        .search-btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 0.6rem 1.8rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .search-btn:hover {
+            background: #ddd;
+            transform: scale(1.02);
+        }
+
+        .script-card {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.25s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .script-card:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-3px);
+            background: rgba(15, 15, 15, 0.9);
+        }
+
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .script-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: white;
+            transform: scale(1.02);
+        }
+
+        .copy-btn.copied {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .script-code {
+            background: #0a0a0a;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #ddd;
+            border: 1px solid #333;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .results-area {
+            margin-top: 0.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+            background: rgba(0,0,0,0.4);
+            border-radius: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page-section.active-section {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        @media (max-width: 700px) {
+            .wrapper { padding: 1rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero { padding: 1.5rem; }
+            .nav-container { gap: 1rem; }
+            .nav-link { font-size: 1rem; padding: 0.4rem 0.8rem; }
+            .script-name { font-size: 1.2rem; }
+            .search-box { flex-wrap: wrap; padding: 0.5rem; }
+            .search-btn { width: 100%; }
+            .counter-value { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<div class="top-nav">
+    <div class="nav-container">
+        <a href="#" class="nav-link" data-page="home">HOME</a>
+        <a href="#" class="nav-link" data-page="script">SCRIPT</a>
+    </div>
+</div>
+
+<div class="wrapper">
+    <div id="homeSection" class="page-section active-section">
+        <section class="hero">
+            <h1>A WEBSITE FOR ROBLOX SCRIPTS</h1>
+            <p style="font-size: 1.4rem; font-weight: 500;">⚡ IS UNDER DEVELOPMENT ⚡</p>
+            
+            <div class="discord-highlight">
+                💬 DEVELOPER DISCORD: <span>RST000</span>
+            </div>
+            
+            <div class="discord-highlight-beta">
+                🧪 BETA-TESTER DISCORD: <span>holirik</span>
+                <span class="verified-badge">
+                    <span class="verified-circle">✓</span>
+                    <span class="verified-text">verified</span>
+                </span>
+            </div>
+            
+            <div style="margin-top: 2rem; display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem;">
+                <a href="https://discordapp.com/users/1479897289047933039" target="_blank" class="btn btn-outline">👨‍💻 Developer Profile</a>
+                <a href="https://discordapp.com/users/1476167244148113481" target="_blank" class="btn btn-outline">🧪 Beta-Tester Profile</a>
+            </div>
+
+            <!-- СЧЁТЧИК КОПИРОВАНИЙ (СЛЕВА ПОД ТАБЛИЦЕЙ РАЗРАБОТЧИКОВ) -->
+            <div class="counter-container">
+                <div class="counter-box">
+                    <div class="counter-label">📋 TOTAL COPIES</div>
+                    <div class="counter-value" id="totalCopiesCounter">0</div>
+                </div>
+                <div class="counter-box">
+                    <div class="counter-label">🎮 SCRIPTS AVAILABLE</div>
+                    <div class="counter-value" id="scriptsCount">0</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="scriptSection" class="page-section">
+        <section class="hero">
+            <h1>⚡ SCRIPT</h1>
+            <p style="font-size: 1rem; margin-top: 0.5rem; opacity: 0.8;">Поиск и копирование скриптов</p>
+        </section>
+
+        <div class="search-container">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="Введите название скрипта...">
+                <button class="search-btn" id="searchBtn">SEARCH</button>
+            </div>
+        </div>
+
+        <div class="results-area" id="resultsArea"></div>
+    </div>
+
+    <footer>
+        <p>© 2025 Roblox Scripts | Разработчик: RST000 | Все права защищены</p>
+    </footer>
+</div>
+
+<script>
+    // === ПЛАВНАЯ ЛИНИЯ ЗА КУРСОРОМ ===
+    const trailContainer = document.getElementById('cursorTrail');
+    let mouseX = 0, mouseY = 0;
+    let lastX = 0, lastY = 0;
+    let lastTimestamp = 0;
+    let animationFrameId = null;
+    
+    const particleDelay = 6;
+    const minSize = 3;
+    const maxSize = 7;
+    const animationDuration = 0.9;
+    
+    const colors = [
+        'rgba(180,180,180,0.8)',
+        'rgba(160,160,160,0.7)',
+        'rgba(140,140,140,0.6)',
+        'rgba(200,200,200,0.7)',
+        'rgba(120,120,120,0.5)'
+    ];
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    
+    function createParticle(x, y) {
+        const particle = document.createElement('div');
+        particle.classList.add('trail-particle');
+        
+        const size = minSize + Math.random() * (maxSize - minSize);
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.background = `radial-gradient(circle, ${randomColor} 0%, rgba(80,80,80,0.4) 100%)`;
+        
+        const offsetX = (Math.random() - 0.5) * 3;
+        const offsetY = (Math.random() - 0.5) * 3;
+        particle.style.left = (x + offsetX) + 'px';
+        particle.style.top = (y + offsetY) + 'px';
+        
+        const duration = animationDuration + Math.random() * 0.3;
+        particle.style.animation = `particleSmooth ${duration}s ease-out forwards`;
+        
+        trailContainer.appendChild(particle);
+        
+        setTimeout(() => {
+            if (particle && particle.remove) particle.remove();
+        }, duration * 1000);
+    }
+    
+    function createParticleBurst(x, y, count) {
+        for (let i = 0; i < count; i++) createParticle(x, y);
+    }
+    
+    function animateTrail(timestamp) {
+        const distance = Math.hypot(mouseX - lastX, mouseY - lastY);
+        
+        if (distance > 0.3) {
+            if (!lastTimestamp || (timestamp - lastTimestamp) >= particleDelay) {
+                let particleCount = 2;
+                if (distance > 10) particleCount = 3;
+                if (distance > 25) particleCount = 4;
+                createParticleBurst(mouseX, mouseY, particleCount);
+                lastX = mouseX;
+                lastY = mouseY;
+                lastTimestamp = timestamp;
+            }
+        }
+        animationFrameId = requestAnimationFrame(animateTrail);
+    }
+    
+    animationFrameId = requestAnimationFrame(animateTrail);
+    
+    window.addEventListener('beforeunload', () => {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    });
+    
+    // === СЧЁТЧИК КОПИРОВАНИЙ ===
+    let totalCopies = localStorage.getItem('totalCopies') ? parseInt(localStorage.getItem('totalCopies')) : 0;
+    
+    function updateTotalCopiesDisplay() {
+        document.getElementById('totalCopiesCounter').textContent = totalCopies;
+        localStorage.setItem('totalCopies', totalCopies);
+    }
+    
+    function incrementTotalCopies() {
+        totalCopies++;
+        updateTotalCopiesDisplay();
+    }
+    
+    // === БАЗА ДАННЫХ СКРИПТОВ ===
+    const scriptsDatabase = [
+        { name: "Fly GUI V3", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()` },
+        { name: "Murder Mystery 2", code: `loadstring(game:HttpGet('https://raw.smokingscripts.org/vertex.lua'))()` },
+        { name: "BABFT (Build A Boat For Treasure)", code: `loadstring(game:HttpGet('https://raw.githubusercontent.com/TheRealAsu/BABFT/refs/heads/main/Loader.lua'))()` },
+        { name: "The Strongest Battlegrounds", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/officialakira/Akira-Hub/refs/heads/main/akira%20tech.lua"))()` },
+        { name: "Blox Fruits", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/meobeo8/a/a/a"))()` },
+        { name: "Arsenal", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Sempiller/Lithium/refs/heads/main/main.lua"))()` },
+        { name: "Steal A Brainrot", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()` },
+        { name: "Infinite Yield", code: `loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()` },
+        { name: "Brookhaven RP (Owl Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Obfuscate/Loader.lua"))()` },
+        { name: "Tower of Hell (Auto Farm)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/iiProductionz/Floater-Scripts/main/WaifuEdition/Tower%20Of%20Hell"))()` },
+        { name: "Pet Simulator 99 (6FootScripts)", code: `loadstring(game:HttpGet('https://raw.githubusercontent.com/SlamminPig/6FootScripts/main/Scripts/PetSimulator99.lua'))()` },
+        { name: "Doors (Game Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "BedWars (Aimbot)", code: `loadstring(game:HttpGet("https://gist.githubusercontent.com/DeveloperMikey/2b8ee3d5a38c56c2cc1db72554850384/raw/bedwar.lua", true))()` },
+        { name: "Bee Swarm Simulator (Atlas Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Chris12089/atlasbss/main/script.lua"))()` },
+        { name: "Royale High (Auto Farm)", code: `loadstring(game:HttpGet("https://pastes.io/raw/rh-30329-3"))()` },
+        { name: "Work at a Pizza Place", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptpastebin/raw/main/16"))()` },
+        { name: "Piggy (Imp Hub)", code: `loadstring(game:HttpGet('https://raw.githubusercontent.com/alan11ago/Hub/refs/heads/main/ImpHub.lua'))()` },
+        { name: "Rainbow Friends (Auto Farm)", code: `pcall(loadstring(game:HttpGet('https://raw.githubusercontent.com/zReal-King/Rainbow-Friends/main/Main.lua')))` },
+        { name: "All Star Tower Defense", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Theme Park Tycoon 2", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Hide and Seek Extreme", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingScripterHub/HideAndSeekExtreme/main/loader.lua"))()` },
+        { name: "Natural Disaster Survival", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Volleyball Legends", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Greenville", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Restaurant Tycoon 2", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptpastebin/raw/main/16"))()` },
+        { name: "Parkour Champions", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingScripterHub/ParkourChampions/main/loader.lua"))()` },
+        { name: "Cotton Obby", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/iiProductionz/Floater-Scripts/main/WaifuEdition/Tower%20Of%20Hell"))()` },
+        { name: "RIVALS", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Evade", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Peroxide", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Type Soul", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Untitled Boxing Game", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Project Slayers", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Sol's RNG", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Anime Last Stand", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Devil Hunter", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()` },
+        { name: "Hunty Zombie", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()` },
+        { name: "Grow a Garden", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptpastebin/raw/main/16"))()` },
+        { name: "Fisch (Xero Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/Xero-Hub/Xero-Hub/main/loader.lua"))()` },
+        { name: "Blade Ball (Chroma Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/ChromaHub/BladeBall/main/loader.lua"))()` },
+        { name: "Dress to Impress (DTI Scripts)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/DTI-Scripts/DTI/main/loader.lua"))()` },
+        { name: "Anime Vanguards", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/void384/Anime-VanguardsDominator/main/loader.lua"))()` },
+        { name: "Dead Rails (Ronix Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/ronix-hub-script/ronix-hub/main/deadrails.lua"))()` },
+        { name: "Arise Crossover (Ronix Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/ronix-hub-script/ronix-hub/main/arise.lua"))()` },
+        { name: "Dandy's World", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/DandysWorldScripts/Main/main/loader.lua"))()` },
+        { name: "Adopt Me! (Mega Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/MegaHub/AdoptMe/main/loader.lua"))()` },
+        { name: "Jailbreak (Volt Hub)", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/VoltHub/Jailbreak/main/loader.lua"))()` },
+        { name: "99 Nights in the Forest", code: `loadstring(game:HttpGet("https://raw.githubusercontent.com/H4xScripts/Loader/refs/heads/main/loader.lua", true))()` }
+    ];
+
+    // Отображение количества скриптов
+    document.getElementById('scriptsCount').textContent = scriptsDatabase.length;
+    updateTotalCopiesDisplay();
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function renderScripts(scriptsToShow) {
+        const resultsArea = document.getElementById('resultsArea');
+        if (!scriptsToShow || scriptsToShow.length === 0) {
+            resultsArea.innerHTML = '<div class="no-results">🔍 Ничего не найдено. Попробуйте другой запрос.</div>';
+            return;
+        }
+        let html = '';
+        for (let i = 0; i < scriptsToShow.length; i++) {
+            const script = scriptsToShow[i];
+            const originalCode = script.code;
+            html += `
+                <div class="script-card" data-script-id="${i}">
+                    <div class="script-header">
+                        <div class="script-name">📜 ${escapeHtml(script.name)}</div>
+                        <button class="copy-btn" data-code="${escapeHtml(originalCode).replace(/"/g, '&quot;')}">
+                            📋 Копировать
+                        </button>
+                    </div>
+                    <div class="script-code">${escapeHtml(originalCode)}</div>
+                </div>
+            `;
+        }
+        resultsArea.innerHTML = html;
+        
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                let encodedCode = btn.getAttribute('data-code');
+                let textarea = document.createElement('textarea');
+                textarea.innerHTML = encodedCode;
+                let codeToCopy = textarea.value;
+                try {
+                    await navigator.clipboard.writeText(codeToCopy);
+                    // Увеличиваем счётчик при успешном копировании
+                    incrementTotalCopies();
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '✅ Скопировано!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    incrementTotalCopies();
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '✅ Скопировано!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }
+            });
+        });
+    }
+
+    function searchScripts() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (query === "") {
+            renderScripts(scriptsDatabase);
+            return;
+        }
+        const filtered = scriptsDatabase.filter(script => script.name.toLowerCase().includes(query));
+        renderScripts(filtered);
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', searchScripts);
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchScripts();
+    });
+
+    const homeSection = document.getElementById('homeSection');
+    const scriptSection = document.getElementById('scriptSection');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function showPage(pageId) {
+        if (pageId === 'home') {
+            homeSection.classList.add('active-section');
+            scriptSection.classList.remove('active-section');
+        } else if (pageId === 'script') {
+            scriptSection.classList.add('active-section');
+            homeSection.classList.remove('active-section');
+            renderScripts(scriptsDatabase);
+        }
+        navLinks.forEach(link => {
+            if (link.getAttribute('data-page') === pageId) {
+                link.style.background = 'rgba(255,255,255,0.2)';
+                link.style.borderColor = 'white';
+            } else {
+                link.style.background = 'rgba(255,255,255,0.03)';
+                link.style.borderColor = 'rgba(255,255,255,0.15)';
+            }
+        });
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = link.getAttribute('data-page');
+            showPage(page);
+        });
+    });
+
+    showPage('home');
+</script>
+</body>
+</html>
